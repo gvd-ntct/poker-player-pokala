@@ -29,7 +29,7 @@ object Player {
         } else {
           s.minimumRaiseAmount + 5
         }
-        math.min(raiseAmount.toInt, s.myStack)
+        math.min(raiseAmount.toInt, s.myStack / 3.0).toInt
       }
       else math.min(s.minimumCallAmountAggresive, s.myStack)
     }

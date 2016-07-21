@@ -127,6 +127,7 @@ object Poker {
     def myCombinedCards = myHoleCards ++ communityCards
     def myStack = players(inAction).stack
     def myBet = players(inAction).bet
+    def otherPlayers = players.filter(_.id != inAction)
   }
 
   case class MatchedAndRest(matches: Cards, rem: Cards)
