@@ -16,4 +16,15 @@ class PlayerTest extends FunSpec with MustMatchers {
     result must not be None
     println(result)
   }
+  it("odds") {
+    import Poker._
+    val current = deck.shuffle
+    val (holes, newCurrent) = current.take(2)
+    val players = 5
+    println(s"holes: $holes, odds: ${odds(holes, List(), newCurrent, players, 100)}")
+
+    val (community, remaining) = newCurrent.take(3)
+
+    println(s"holes: $holes, community: $community, odds: ${odds(holes, community, remaining, players, 100)}")
+  }
 }

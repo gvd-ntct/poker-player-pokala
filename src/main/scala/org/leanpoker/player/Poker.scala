@@ -86,6 +86,22 @@ object Poker {
 
   val deck = Deck(cards)
 
+  def value(rank: Rank) = ranks.indexOf(rank)
+  def value(suit: Suit) = suits.indexOf(suit)
+  def value(card: Card) = suits.indexOf(card.rank)
+
+  implicit val rankOrdering = new Ordering[Rank] {
+    override def compare(x: Rank, y: Rank): Int = {
+      value(x) - value(y) // Not the fastest but concise
+    }
+  }
+  implicit val suitOrdering = new Ordering[Suit] {
+    override def compare(x: Suit, y: Suit): Int = {
+      value(x) - value(y)
+    }
+  }
+  implicit val cardByRankOrdering: Ordering[Card] = Ordering.by(_.rank)
+
   case class Player(id: Int, name: String, status: String, version: String, stack: Int, bet: Int, holeCards: Cards)
   case class GameState(tournamentId: String,
                        gameId: String,
@@ -111,6 +127,129 @@ object Poker {
     def myCombinedCards = myHoleCards ++ communityCards
     def myStack = players(inAction).stack
   }
+
+  case class MatchedAndRest(matches: Cards, rem: Cards)
+  // Identical ranks
+  object IsFourOfAKind {
+    def unapply(cards: Cards): Option[MatchedAndRest] = {
+      cards.groupBy(_.rank).find(_._2.size == 4).map { case (rank, matches) =>
+        MatchedAndRest(matches, cards diff matches)
+      }
+    }
+  }
+  object IsThreeOfAKind {
+    def unapply(cards: Cards): Option[MatchedAndRest] = {
+      cards.groupBy(_.rank).find(_._2.size == 3).map { case (rank, matches) =>
+        MatchedAndRest(matches, cards diff matches)
+      }
+    }
+  }
+  object IsPair {
+    def unapply(cards: Cards): Option[MatchedAndRest] = {
+      cards.groupBy(_.rank).find(_._2.size == 2).map { case (rank, matches) =>
+        MatchedAndRest(matches, cards diff matches)
+      }
+    }
+  }
+
+  object IsTwoPair {
+    def unapply(cards: Cards): Option[MatchedAndRest] = {
+      val groups = cards.groupBy(_.rank).filter(_._2.size == 2).toList.map(_._2).sortBy(_.head).reverse
+      if (groups.size >= 2) {
+        val matches = groups.take(2).flatten
+        Some(MatchedAndRest(matches, cards diff matches))
+      } else None
+    }
+  }
+
+  object IsStraightFlush {
+    def unapply(cards: Cards): Option[MatchedAndRest] = {
+      cards match {
+        case IsStraight(matches) if matches.matches.groupBy(_.suit).head._2.size == matches.matches.size => Some(matches)
+        case _ => None
+      }
+    }
+  }
+
+  object IsStraight {
+    def unapply(cards: Cards): Option[MatchedAndRest] = {
+      cards.sorted.sliding(5).flatMap {l =>
+        val s = l.map(_.rank).toSet
+        if (l.size == s.size && (value(l.max.rank) - value(l.min.rank)) == 4) Some(l)
+        else None
+      }.toList.headOption.map(m => MatchedAndRest(m, cards diff m))
+    }
+  }
+
+  object IsFlush {
+    def unapply(cards: Cards): Option[MatchedAndRest] = {
+      cards.groupBy(_.suit).filter(_._2.size >= 5).toList.map(_._2.sorted.reverse.take(5))
+        .headOption.map { matches => MatchedAndRest(matches, cards diff matches) }
+    }
+  }
+
+  object IsRoyalFlush {
+    def unapply(cards: Cards): Option[MatchedAndRest] = cards match {
+      case IsFlush(matches) if matches.matches.sorted.reverse.head.rank == Ace => Some(matches)
+      case _ => None
+    }
+  }
+  object IsHighCard {
+    def unapply(cards: Cards): Option[MatchedAndRest] = {
+      val matches = List(cards.max)
+      Some(MatchedAndRest(matches, cards diff matches))
+    }
+  }
+
+  object IsFullHouse {
+    def unapply(cards: Cards): Option[MatchedAndRest] = None
+  }
+
+  def rank(cards: Cards): Int = cards match {
+    case IsRoyalFlush(matches) => ranks.size + 2 + 9
+    case IsStraightFlush(matches) => ranks.size + 2 + 8
+    case IsFourOfAKind(matches) => ranks.size + 2 + 7
+    case IsFullHouse(matches) => ranks.size + 2 + 6
+    case IsFlush(matches) => ranks.size + 2 + 5
+    case IsStraight(matches) => ranks.size + 2 + 4
+    case IsThreeOfAKind(matches) => ranks.size + 2 + 3
+    case IsTwoPair(matches) => ranks.size + 2 + 2
+    case IsPair(matches) => ranks.size + 2 + 1
+    case IsHighCard(matches) => ranks.indexOf(matches.matches.head.rank) + 2
+    case _ => 0
+  }
+
+  /**
+    * This method currently incorrectly handles equal hands (e.g. Two Pairs vs Two Pairs)
+    *
+    * @param hole
+    * @param community
+    * @param remaining
+    * @param players
+    * @param iterations
+    * @return
+    */
+  def odds(hole: Cards, community: Cards, remaining: Deck, players: Int, iterations: Int) = {
+    val combined = hole ++ community
+    val myRank = rank(combined)
+    val games = 1 to iterations map { iter =>
+      var current = remaining.shuffle // Play different games
+    val playerRanks = 1 to players map { player =>
+        val (playerCards, newDeck) = current.take(2)
+        current = newDeck
+        val playerCombined = playerCards ++ community
+        val playerRank = rank(playerCombined)
+        if (myRank > playerRank) true
+        else if (myRank == playerRank && value(combined.max) > value(playerCombined.max)) true
+        else false
+      }
+      playerRanks.forall(identity)
+    }
+    val wins = games.count(identity)
+    val losses = games.size - wins
+    (wins.toDouble / iterations, losses.toDouble / iterations)
+  }
+
 }
 
 object Parsing {
