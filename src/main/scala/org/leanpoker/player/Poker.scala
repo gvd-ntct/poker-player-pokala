@@ -100,8 +100,8 @@ object Poker {
                        pot: Int,
                        players: IndexedSeq[Player],
                        communityCards: Cards) {
-    def minimumCallAmount: Int = currentBuyIn - players(inAction).bet
-    def minimumRaiseAmount: Int = minimumCallAmount + minimumRaise
+    def minimumCallAmount: Int = math.max(0, currentBuyIn - players(inAction).bet)
+    def minimumRaiseAmount: Int = math.max(0, minimumCallAmount + minimumRaise)
     def myHoleCards = players(inAction).holeCards
     def myCombinedCards = myHoleCards ++ communityCards
     def myStack = players(inAction).stack
