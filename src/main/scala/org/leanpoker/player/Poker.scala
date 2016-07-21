@@ -235,7 +235,7 @@ object Poker {
     val myRank = rank(combined)
     val games = 1 to iterations map { iter =>
       var current = remaining.shuffle // Play different games
-    val playerRanks = 1 to players map { player =>
+      val playerRanks = 1 to players map { player =>
         val (playerCards, newDeck) = current.take(2)
         current = newDeck
         val playerCombined = playerCards ++ community
@@ -249,6 +249,38 @@ object Poker {
     val wins = games.count(identity)
     val losses = games.size - wins
     (wins.toDouble / iterations, losses.toDouble / iterations)
+  }
+
+  def chenFormula(hole: Cards): Double = {
+    // http://www.thepokerbank.com/strategy/basic/starting-hand-selection/chen-formula/
+    val highCard = hole.max
+    println( s"We have ${hole(0)} and ${hole(1)}. $highCard is highest.")
+
+    var points = {
+      ( highCard.rank match {
+        case Ace => 10.0
+        case King => 8.0
+        case Jack => 6.0
+        case r : Rank => (value(r)+2) / 2.0
+      } )
+    }
+
+
+    val delta = Math.abs(value(hole(0).rank) - value(hole(1).rank))
+    println(s"High card is ${highCard.rank} so points are now $points. Delta is $delta")
+    points = delta match {
+      case 0 => Math.max(points * 2, 5)
+      case 1 => points + 1
+      case 2 => points - 1
+      case 3 => points - 2
+      case 4 => points - 4
+      case 5 => points - 5
+    }
+
+    if( hole(0).suit == hole(1).suit ) {
+      points += 2
+    }
+    points
   }
 
 }

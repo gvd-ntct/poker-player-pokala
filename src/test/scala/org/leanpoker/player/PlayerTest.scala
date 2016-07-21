@@ -27,4 +27,17 @@ class PlayerTest extends FunSpec with MustMatchers {
 
     println(s"holes: $holes, community: $community, odds: ${odds(holes, community, remaining, players, 100)}")
   }
+
+  it("chen formula") {
+    import Poker._
+
+    val holeAce = List(Card(Spades, Ace), Card(Spades, King))
+    Poker.chenFormula(holeAce) must be (13.0)
+
+    Poker.chenFormula(List(Card(Spades, Ace), Card(Diamonds, Ace))) must be (20.0)
+    Poker.chenFormula(List(Card(Spades, Nine), Card(Spades, Eight))) must be (7.5)
+    Poker.chenFormula(List(Card(Spades, King), Card(Spades, Nine))) must be (6.0)
+
+
+  }
 }
