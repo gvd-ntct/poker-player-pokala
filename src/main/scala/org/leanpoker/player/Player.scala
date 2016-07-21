@@ -13,8 +13,8 @@ object Player {
     val bet = state.fold(0) { s =>
       val rem = Poker.cards diff s.myCombinedCards
       val deck = Deck(rem)
-      val preFlopOdds = Poker.odds(s.myHoleCards, List(), deck, s.players.size, 100)
-      val odds = Poker.odds(s.myHoleCards, s.communityCards, deck, s.players.size, 100)
+      val preFlopOdds = Poker.odds(s.myHoleCards, List(), deck, s.players.size - 1, 100)
+      val odds = Poker.odds(s.myHoleCards, s.communityCards, deck, s.players.size - 1, 100)
       val combinedOdds = (preFlopOdds._1 + odds._1) / 2.0
       val randomOdds = 1.0 / s.players.size
       if (combinedOdds == 0.0) 0
