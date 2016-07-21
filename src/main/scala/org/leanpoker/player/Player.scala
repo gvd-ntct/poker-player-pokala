@@ -4,7 +4,7 @@ import com.google.gson.JsonElement
 
 object Player {
 
-  val VERSION = "Default Scala folding player"
+  val VERSION = "Pokala initial data model"
 
   def betRequest(request: JsonElement) = 0
 
