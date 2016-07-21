@@ -18,6 +18,10 @@ object Player {
       val odds = Poker.odds(s.myHoleCards, s.communityCards, deck, s.players.size - 1, 100)
       val combinedOdds = (preFlopOdds._1 + odds._1) / 2.0
       val randomOdds = 1.0 / s.players.size
+      System.err.println(s"Our rank is $rank")
+      System.err.println(s"Our preFlopOdds are $preFlopOdds")
+      System.err.println(s"Our odds are $odds")
+      System.err.println(s"Our combined odds are $combinedOdds")
       if (combinedOdds == 0.0) 0
       else if (combinedOdds > randomOdds) {
         val raiseAmount = if (rank >= (Poker.ranks.size + 2 + 3)) {
