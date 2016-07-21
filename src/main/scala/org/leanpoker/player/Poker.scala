@@ -101,6 +101,11 @@ object Poker {
                        players: IndexedSeq[Player],
                        communityCards: Cards) {
     def minimumCallAmount: Int = math.max(0, currentBuyIn - players(inAction).bet)
+    def minimumCallAmountAggresive: Int = {
+      if ( ((dealer+1) % players.size) == inAction) {
+        math.min(10, myStack)
+      } else minimumCallAmount
+    }
     def minimumRaiseAmount: Int = math.max(0, minimumCallAmount + minimumRaise)
     def myHoleCards = players(inAction).holeCards
     def myCombinedCards = myHoleCards ++ communityCards
