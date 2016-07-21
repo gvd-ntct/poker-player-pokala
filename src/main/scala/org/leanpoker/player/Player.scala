@@ -25,7 +25,7 @@ object Player {
       if (s.communityCards.isEmpty && s.minimumRaise > 100 && rank < (Poker.ranks.size + 2)) {
         0
       } else {
-        if (combinedOdds == 0.0) 0
+        if (combinedOdds == 0.0 && s.minimumRaise > 50) 0
         else if (combinedOdds > randomOdds) {
           val raiseAmount = if (rank >= (Poker.ranks.size + 2 + 3) && rank < (Poker.ranks.size + 2 + 6)) {
             math.max(s.minimumRaiseAmount * 2.0, s.minimumRaiseAmount + 5)
