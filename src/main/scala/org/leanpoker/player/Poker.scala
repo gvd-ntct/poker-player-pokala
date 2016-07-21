@@ -126,6 +126,7 @@ object Poker {
     def myHoleCards = players(inAction).holeCards
     def myCombinedCards = myHoleCards ++ communityCards
     def myStack = players(inAction).stack
+    def myBet = players(inAction).bet
   }
 
   case class MatchedAndRest(matches: Cards, rem: Cards)
