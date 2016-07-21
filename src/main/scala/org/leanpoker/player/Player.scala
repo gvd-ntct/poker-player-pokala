@@ -18,7 +18,7 @@ object Player {
       val combinedOdds = (preFlopOdds._1 + odds._1) / 2.0
       val randomOdds = 1.0 / s.players.size
       if (combinedOdds == 0.0 && s.myBet < 50) 0
-      else if (combinedOdds > randomOdds) math.min(s.minimumRaiseAmount + 5, s.myStack)
+      else if (combinedOdds > randomOdds && s.myBet < (s.myStack / 2.0)) math.min(s.minimumRaiseAmount + 5, s.myStack)
       else math.min(s.minimumCallAmountAggresive, s.myStack)
     }
     System.err.println(s"Our bet $bet")
