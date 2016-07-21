@@ -22,14 +22,12 @@ object Player {
       System.err.println(s"Our preFlopOdds are $preFlopOdds")
       System.err.println(s"Our odds are $odds")
       System.err.println(s"Our combined odds are $combinedOdds")
-      val highestBetOtherUsers = s.otherPlayers.map(_.bet).max
-      System.err.println(s"highestBetOtherUsers $highestBetOtherUsers")
-      if (s.communityCards.isEmpty && highestBetOtherUsers > 100 && rank < (Poker.ranks.size + 2)) {
+      if (s.communityCards.isEmpty && s.minimumRaise > 100 && rank < (Poker.ranks.size + 2)) {
         0
       } else {
         if (combinedOdds == 0.0) 0
         else if (combinedOdds > randomOdds) {
-          val raiseAmount = if (rank >= (Poker.ranks.size + 2 + 3)) {
+          val raiseAmount = if (rank >= (Poker.ranks.size + 2 + 3) && rank < (Poker.ranks.size + 2 + 6)) {
             math.max(s.minimumRaiseAmount * 2.0, s.minimumRaiseAmount + 5)
           } else if (rank >= (Poker.ranks.size + 2 + 6)) {
             math.max(s.minimumRaiseAmount * 3.0, s.minimumRaiseAmount + 5)
