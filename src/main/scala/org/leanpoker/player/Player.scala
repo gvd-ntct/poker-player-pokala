@@ -10,7 +10,7 @@ object Player {
     val state = Parsing.parseGame(request)
     val bet = state.fold(0) { s =>
       val num = random.nextInt(10)
-      if (num < 4) {
+      if (num < 7) {
         math.min(s.minimumCallAmount, s.myStack)
       } else if (num == 0) {
         math.min(s.minimumRaiseAmount + 2, s.myStack)
